@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clean Energy Assistant</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4caf50;
+            --secondary-color: #e8f5e9;
+            --text-color: #333;
+            --light-color: #f1f1f1;
+            --border-color: #ddd;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f9f9f9;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+        
+        header h1 {
+            margin-bottom: 10px;
+        }
+        
+        .tagline {
+            font-style: italic;
+            color: #666;
+        }
+        
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px var(--shadow-color);
+            overflow: hidden;
+        }
+        
+        .chat-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .chat-header i {
+            margin-right: 10px;
+            font-size: 1.4em;
+        }
+        
+        .chat-messages {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 60vh;
+            min-height: 300px;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            max-width: 80%;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .user-message {
+            margin-left: auto;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 18px 18px 0 18px;
+            padding: 10px 15px;
+        }
+        
+        .bot-message {
+            background-color: var(--light-color);
+            border-radius: 18px 18px 18px 0;
+            padding: 15px 20px;
+            line-height: 1.5;
+        }
+        
+        .bot-message a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .bot-message a:hover {
+            text-decoration: underline;
+        }
+        
+        .bot-message p {
+            margin-bottom: 15px;
+        }
+        
+        .bot-message p:last-child {
+            margin-bottom: 0;
+        }
+        
+        .bot-message h2, 
+        .bot-message h3 {
+            margin-top: 15px;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .bot-message ul, 
+        .bot-message ol {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .bot-message li {
+            margin-bottom: 8px;
+        }
+        
+        .bot-message .response-list {
+            margin: 15px 0;
+            padding-left: 15px;
+        }
+        
+        .bot-message .response-list li {
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+        
+        .bot-message strong {
+            color: #2e7d32;
+        }
+        
+        .chat-input {
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            background-color: white;
+        }
+        
+        .chat-input input {
+            flex-grow: 1;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 30px;
+            outline: none;
+            font-size: 16px;
+        }
+        
+        .chat-input input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+        
+        .chat-input button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            margin-left: 10px;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+        
+        .chat-input button:hover {
+            background-color: #3d8b40;
+        }
+        
+        .chat-input button i {
+            margin-left: 8px;
+        }
+        
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .typing-indicator span {
+            background-color: #e0e0e0;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 1px;
+            animation: typing 1s infinite;
+        }
+        
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes typing {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        .suggestion-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .suggestion-chip {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            border: 1px solid #c8e6c9;
+            transition: all 0.2s;
+        }
+        
+        .suggestion-chip:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+        }
+        
+        .file-upload {
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .file-upload label {
+            cursor: pointer;
+            background-color: var(--secondary-color);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            transition: all 0.2s;
+        }
+        
+        .file-upload label:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .image-preview {
+            max-width: 300px;
+            max-height: 200px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .image-preview img {
+            max-width: 100%;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Clean Energy Assistant</h1>
+            <p class="tagline">Your guide to renewable energy solutions</p>
+        </header>
+        
+        <div class="chat-container">
+            <div class="chat-header">
+                <i class="fas fa-leaf"></i>
+                <h2>Renewable Energy Chat</h2>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <!-- Welcome message -->
+                <div class="message bot-message">
+                    <p>Welcome! I'm your renewable energy assistant. I can help you with information about solar, wind, geothermal, and other clean energy sources. What would you like to know today?</p>
+                </div>
+                
+                <!-- Suggestion chips -->
+                <div class="suggestion-chips">
+                    <div class="suggestion-chip" onclick="sendSuggestion('How do solar panels work?')">How do solar panels work?</div>
+                    <div class="suggestion-chip" onclick="sendSuggestion('Wind vs solar energy comparison')">Wind vs solar comparison</div>
+                    <div class="suggestion-chip" onclick="sendSuggestion('Tax incentives for renewable energy')">Tax incentives</div>
+                    <div class="suggestion-chip" onclick="sendSuggestion('Cost of home solar installation')">Solar installation cost</div>
+                </div>
+                
+                <!-- Typing indicator -->
+                <div class="typing-indicator" id="typingIndicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+            
+            <div class="chat-input">
+                <div class="file-upload">
+                    <label for="imageUpload">
+                        <i class="fas fa-image"></i>
+                    </label>
+                    <input type="file" id="imageUpload" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                </div>
+                <input type="text" id="userInput" placeholder="Ask about renewable energy..." 
+                       onkeypress="if(event.keyCode === 13) sendMessage()">
+                <button onclick="sendMessage()">Send <i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2025 Clean Energy Assistant | Done by Thrust Vector | For informational purposes only</p>
+        </footer>
+    </div>
+    
+    <script>
+        // Function to show typing indicator
+        function showTypingIndicator() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            typingIndicator.style.display = 'flex';
+        }
+        
+        // Function to hide typing indicator
+        function hideTypingIndicator() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            typingIndicator.style.display = 'none';
+        }
+        
+        // Function to add a message to the chat
+        function addMessage(text, isUser = false) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            
+            // Process links and formatting in bot messages
+            if (!isUser) {
+                // Process bold text with ** markers first (before HTML check)
+                if (text.includes('**')) {
+                    let boldProcessed = '';
+                    let inBold = false;
+                    let parts = text.split('**');
+                    
+                    for (let i = 0; i < parts.length; i++) {
+                        if (i === 0) {
+                            boldProcessed += parts[i];
+                        } else {
+                            if (!inBold) {
+                                boldProcessed += '<strong>' + parts[i];
+                                inBold = true;
+                            } else {
+                                boldProcessed += '</strong>' + parts[i];
+                                inBold = false;
+                            }
+                        }
+                    }
+                    
+                    // If we ended up with an unclosed tag, close it
+                    if (inBold) {
+                        boldProcessed += '</strong>';
+                    }
+                    
+                    text = boldProcessed;
+                }
+                
+                // Check if the text already contains HTML formatting (look for ul, li, ol, p tags)
+                const containsHTML = /<ul|<li|<ol|<p|<h2|<h3/i.test(text);
+                
+                if (!containsHTML) {
+                    // Simple formatting for text without HTML
+                    
+                    // Convert markdown-style headers to HTML
+                    text = text.replace(/^# (.*$)/gm, '<h2>$1</h2>');
+                    text = text.replace(/^## (.*$)/gm, '<h3>$1</h3>');
+                    
+                    // Convert markdown-style bullet points to list items
+                    if (text.includes("\n* ") || text.includes("\n- ")) {
+                        const lines = text.split("\n");
+                        let formattedText = "";
+                        let inList = false;
+                        
+                        for (let i = 0; i < lines.length; i++) {
+                            const line = lines[i].trim();
+                            
+                            if (line.startsWith("* ") || line.startsWith("- ")) {
+                                // Start list if not already in one
+                                if (!inList) {
+                                    formattedText += "<ul class='response-list'>";
+                                    inList = true;
+                                }
+                                
+                                // Add list item
+                                formattedText += "<li>" + line.substring(2) + "</li>";
+                            } else {
+                                // Close list if we were in one
+                                if (inList) {
+                                    formattedText += "</ul>";
+                                    inList = false;
+                                }
+                                
+                                // Add normal line
+                                if (line) {
+                                    formattedText += line + "<br>";
+                                }
+                            }
+                        }
+                        
+                        // Close list if still open
+                        if (inList) {
+                            formattedText += "</ul>";
+                        }
+                        
+                        text = formattedText;
+                    }
+                    
+                    // Convert paragraphs if not already processed
+                    if (!text.includes("<ul") && !text.includes("<br>")) {
+                        const paragraphs = text.split("\n\n");
+                        if (paragraphs.length > 1) {
+                            text = paragraphs.map(p => `<p>${p}</p>`).join("");
+                        }
+                    }
+                }
+                
+                // Make URLs clickable (regardless of HTML presence)
+                text = text.replace(
+                    /(https?:\/\/[^\s<]+)/g, 
+                    '<a href="$1" target="_blank">$1</a>'
+                );
+            }
+            
+            messageDiv.innerHTML = text;
+            chatMessages.appendChild(messageDiv);
+            
+            // Scroll to the bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Function to send a suggestion
+        function sendSuggestion(text) {
+            document.getElementById('userInput').value = text;
+            sendMessage();
+        }
+        
+        // Function to send a message
+        async function sendMessage() {
+            const userInput = document.getElementById('userInput');
+            const message = userInput.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message to chat
+            addMessage(message, true);
+            
+            // Clear input
+            userInput.value = '';
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            try {
+                // Send message to server
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                // Hide typing indicator
+                hideTypingIndicator();
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addMessage(data.response);
+                } else {
+                    addMessage("Sorry, I'm having trouble connecting to the server. Please try again later.");
+                }
+            } catch (error) {
+                // Hide typing indicator
+                hideTypingIndicator();
+                addMessage("Network error. Please check your connection and try again.");
+                console.error('Error:', error);
+            }
+        }
+        
+        // New function to handle image uploads
+        async function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            // Create FormData object
+            const formData = new FormData();
+            formData.append('image', file);
+            
+            // Create message with image preview
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message user-message';
+            
+            // Add image preview
+            const preview = document.createElement('div');
+            preview.className = 'image-preview';
+            const img = document.createElement('img');
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+            preview.appendChild(img);
+            messageDiv.appendChild(preview);
+            
+            // Add text
+            const text = document.createElement('div');
+            text.textContent = "Analyzing this image...";
+            messageDiv.appendChild(text);
+            
+            // Add to chat
+            chatMessages.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            // Reset file input
+            document.getElementById('imageUpload').value = '';
+            
+            try {
+                // Upload image to server
+                const response = await fetch('/upload-image', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                // Hide typing indicator
+                hideTypingIndicator();
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addMessage(data.response);
+                } else {
+                    addMessage("Sorry, I couldn't process this image. Please try again with a different image.");
+                }
+            } catch (error) {
+                // Hide typing indicator
+                hideTypingIndicator();
+                addMessage("Network error. Please check your connection and try again.");
+                console.error('Error:', error);
+            }
+        }
+        
+        // Focus input on page load
+        window.onload = function() {
+            document.getElementById('userInput').focus();
+        };
+    </script>
+</body>
+</html>
